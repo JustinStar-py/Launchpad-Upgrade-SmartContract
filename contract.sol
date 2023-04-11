@@ -15,7 +15,7 @@ contract unisalePresale {
             1671636654,
             0xBB842f9Da3e567061f6891aC84d584Be75fD2773
         );
-        wlAddrs[1].push(0x504C30f2b63AB40a61227848e739964a6e11A480);
+        wlAddrs[1][0x504C30f2b63AB40a61227848e739964a6e11A480] = true;
     }
 
    struct Presale {
@@ -45,7 +45,7 @@ contract unisalePresale {
    
    Presale[] public presales;
    
-   uint256 public feePoolPrice = 0.3 ether;
+   uint256 public feePoolPrice = 0.1 ether;
    address public companyAcc = 0x54a6963429c65097E51d429662dC730517e630d5;
    
    uint public idCounter;
@@ -53,10 +53,23 @@ contract unisalePresale {
    mapping (uint => mapping(address => uint)) public bnbParticipated;
    mapping (uint => mapping(address => bool)) public tokensPaid;
    mapping (uint => mapping(address => bool)) public refundsPaid;
+   mapping (uint => mapping (address => bool)) public wlAddrs;
    mapping (address => Presale[]) public presaleToOwner;
    mapping (uint => address) public prsIdtoOwner;
-   mapping (uint => address[]) public wlAddrs;
+
    
+   // checking that target peesale has whitelist or no
+   modifier _checkWhitelist(uint _id) {
+         require(presales[_id].launchpadInfo[1] == 1, "The presale doesn't have whitelist method");
+         _;
+   }
+   
+   // check payment of tokens for paying tokens to user
+   modifier assessAddressPayment(uint _id, address _addr) {
+      require (tokensPaid[_id][_addr], "Tokens of target user already paid before.");
+      _;
+   }
+
    // our contract functions start here
    function _createPresale (
       address tokenCA, 
@@ -131,7 +144,7 @@ contract unisalePresale {
          require(poolBalance >= 1 ether, 'As of right now, there are no tokens in this pool.');
          // Send payment
          if (presales[_id].launchpadInfo[1] == 1) {
-            require(_whitelistValidate(_id,msg.sender) == true,"Your address is not in whitelist of this presale.");
+            require(_whitelistValidate(_id, msg.sender) == true,"Your address is not in whitelist of this presale.");
             bnbParticipated[_id][msg.sender] = msg.value;
             presales[_id].totalBnbRaised += msg.value;
             // pay to pool of pool owner
@@ -149,63 +162,29 @@ contract unisalePresale {
    }
   
    function _whitelistValidate(uint _id, address _user) internal view returns (bool) {
-      if (presales[_id].launchpadInfo[1] == 1) {
-            for (uint i = 0; i < wlAddrs[_id].length; i++) {
-                  if (wlAddrs[_id][i] == _user) {
-                     return true;
-                  }
-            }
-            return false;
-      } else {
-          return true;
-      }
-   }
-
-   function _checkWhitelist(uint _id) private view returns (bool) {
-      if (presales[_id].launchpadInfo[1] == 1) {
-         return true;
-      }
-     return false;
+       return wlAddrs[_id][_user];
    }
 
    function _checkPresaleLaunching(uint _id) public view returns (bool) {
-       if (presales[_id].totalBnbRaised >= presales[_id].launchpadInfo[2] * 1 ether) {
-               return true;
-       } 
-       return false;
+       return (presales[_id].totalBnbRaised >= presales[_id].launchpadInfo[2] * 1 ether);
    }
 
-   function addWlAddr(uint _id, address _addr) external returns (bool) {
+   function addWlAddr(uint _id, address _addr) external _checkWhitelist(_id) {
       require(presaleToOwner[msg.sender].length > 0, "you haven't made any presale yet!");
       require(msg.sender == prsIdtoOwner[_id], "You are not founder of this presale.");
-      require(_whitelistValidate(_id,_addr) == false, "Address already exists in whitelist!");
-      require(_checkWhitelist(_id), "This presale doesn't have whitelist method.");
-      wlAddrs[_id].push(_addr);
-      return true;
+      require(!_whitelistValidate(_id,_addr), "Address already exists in whitelist!");
+      wlAddrs[_id][_addr] = true;
    }
    
-   function removeWlAddr(uint _id, address _addr) external returns (bool) {
+   function removeWlAddr(uint _id, address _addr) external _checkWhitelist(_id) {
       require(presaleToOwner[msg.sender].length > 0, "you haven't made any presale yet!");
       require(msg.sender == prsIdtoOwner[_id], "You are not founder of this presale.");
-      require(_whitelistValidate(_id,_addr) == true, "Could not find address in this whitelist.");
-      require(_checkWhitelist(_id), "This presale doesn't have whitelist method.");
-      for (uint i = 0; i < wlAddrs[_id].length; i++) {
-            if (wlAddrs[_id][i] == _addr) {
-                 wlAddrs[_id][i] = 0x0000000000000000000000000000000000000000;
-                 return true;
-            }
-      }
-      return false;
+      require(_whitelistValidate(_id,_addr), "Could not find address in this whitelist.");
+      wlAddrs[_id][_addr] = false;
    }
    
-   function assessAddressPayment(uint _id, address _addr) internal view returns (bool) {
-         if (tokensPaid[_id][_addr] == true) {
-            return false;
-         }
-       return true;
-   }
 
-   function distributePoolTokens(uint _id, address _token, address _to) external returns (bool) {
+   function distributePoolTokens(uint _id, address _token, address _to) external assessAddressPayment(_id, _to) returns (bool) {
        require(_id <= presales.length - 1, "Presale not found.");
        // check time that presale ended or no
        require(block.timestamp > presales[_id].endTime, "Please wait until presale ends, the presale is still running.");
@@ -213,8 +192,6 @@ contract unisalePresale {
        require(presales[_id].pool == msg.sender, 'This function must be called by a pool , no private address.');
        // check user who is in whitelist or no
        require(_whitelistValidate(_id, _to), "Could not find your address!");
-       // check user who got her/his token
-       require(assessAddressPayment(_id, _to), "Your tokens already paid before.");
        // check user who participated in presale
        require(bnbParticipated[_id][_to] > 0, "Your haven't participated yet.");
 
