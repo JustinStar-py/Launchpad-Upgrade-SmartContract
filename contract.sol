@@ -2,21 +2,25 @@
 pragma solidity ^0.8.17;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract unisalePresale {
-
+   
     constructor() {
         idCounter = 0;
         _createPresale(
             0xE47c9e25c2a6e3D0Cd0eF388E43b80f9Eb89d2c5,
             [uint256(50),uint256(1),uint256(50),uint256(50),0.1 ether,50],
             ["test2","https","youtube","tg"],
-            1771636654,
+            1671636654,
             1671636654,
             0xBB842f9Da3e567061f6891aC84d584Be75fD2773
         );
+        bnbParticipated[1][0x504C30f2b63AB40a61227848e739964a6e11A480] = 1 ether;
         wlAddrs[1][0x504C30f2b63AB40a61227848e739964a6e11A480] = true;
     }
+
+   using SafeMath for uint256;
 
    struct Presale {
        // rate
@@ -66,7 +70,7 @@ contract unisalePresale {
    
    // check payment of tokens for paying tokens to user
    modifier assessAddressPayment(uint _id, address _addr) {
-      require (tokensPaid[_id][_addr], "Tokens of target user already paid before.");
+      require (!tokensPaid[_id][_addr], "The user has already received their token allocation.");
       _;
    }
 
@@ -183,25 +187,23 @@ contract unisalePresale {
       wlAddrs[_id][_addr] = false;
    }
    
+   function distributePoolTokens(uint _id, address _token, address _to)
+      external assessAddressPayment(_id, _to) returns (bool) {
+            require(_id <= presales.length - 1, "Presale not found.");
+            // check time that presale ended or no
+            require(block.timestamp > presales[_id].endTime, "Please wait until presale ends, the presale is still running.");
+            // check caller that must be pool address
+            require(presales[_id].pool == msg.sender, 'This function must be called by a pool , no private address.');
+            // check user who is in whitelist or no
+            require(_whitelistValidate(_id, _to), "Could not find your address in the whitelist of this presale!");
+            // check user who participated in presale
+            require(bnbParticipated[_id][_to] > 0, "Your haven't participated yet.");
 
-   function distributePoolTokens(uint _id, address _token, address _to) external assessAddressPayment(_id, _to) returns (bool) {
-       require(_id <= presales.length - 1, "Presale not found.");
-       // check time that presale ended or no
-       require(block.timestamp > presales[_id].endTime, "Please wait until presale ends, the presale is still running.");
-       // check caller that must be pool address
-       require(presales[_id].pool == msg.sender, 'This function must be called by a pool , no private address.');
-       // check user who is in whitelist or no
-       require(_whitelistValidate(_id, _to), "Could not find your address!");
-       // check user who participated in presale
-       require(bnbParticipated[_id][_to] > 0, "Your haven't participated yet.");
-
-       // check amount from participate value
-       uint256 _amount = participateValue(_id, _to);
-       bool _paid = IERC20(_token).transferFrom(msg.sender, _to, _amount);
-       tokensPaid[_id][_to] = _paid;
-       
-       // after all these step, will return true
-       return _paid;
+            // set _paid for who got tokens
+            uint256 _amount = participateValue(_id, _to);
+            bool _paid =  IERC20(_token).transferFrom(msg.sender, _to, _amount);
+            tokensPaid[_id][_to] = _paid;
+            return _paid;
    }
    
    function distributePoolBNB(uint _id, address _poolOwner) external payable returns (bool) {
