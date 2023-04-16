@@ -15,7 +15,7 @@
 <li> Public Sell </p>
 
 <h4> Using this function for creating new presale</h4>
-<div>
+<pre>
 function CreatePresale ( 
      address _tokenCA,uint256[6] memory _launchpadInfo, 
      string[4] memory _Additional,  
@@ -24,5 +24,5 @@ function CreatePresale (
      address _pool, 
      address next_pool
    ) 
- </div>
+ </pre>
  <titel> Line 129 </title>
