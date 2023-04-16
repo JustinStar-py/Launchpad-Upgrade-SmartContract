@@ -23,20 +23,20 @@ contract unisalePresale {
    using SafeMath for uint256;
 
    struct Presale {
-       // rate
-       // method
-       // softCap
-       // hardCap
-       // minBuy
-       // maxBuy
-       // info
-       // tgLink
-       // ybLink
-       // twLink
-       // startTime
-       // endTime
-       // totalBnbRaised
-       // presaleEnded
+      // rate
+      // method
+      // softCap
+      // hardCap
+      // minBuy
+      // maxBuy
+      // info
+      // tgLink
+      // ybLink
+      // twLink
+      // startTime
+      // endTime
+      // totalBnbRaised
+      // presaleEnded
       uint id;
       address tokenCA;
       address pool;
@@ -73,7 +73,13 @@ contract unisalePresale {
       require (!tokensPaid[_id][_addr], "The user has already received their token allocation.");
       _;
    }
-
+   
+   // Check presale launc
+   modifier _checkPresaleLaunching(uint _id) {
+      require(presales[_id].totalBnbRaised <= presales[_id].launchpadInfo[2] * 1 ether, "This presale launched, so you can't refund your tokens.");
+      _;
+   }
+   
    // our contract functions start here
    function _createPresale (
       address tokenCA, 
@@ -127,6 +133,22 @@ contract unisalePresale {
       require(_id <= presales.length - 1, "Presale not found.");
       return presales[_id];
    }
+   
+   function _returnPresaleStatus(uint _id) public view returns (string memory) {
+      uint endTime = presales[_id].endTime;
+      uint currentTime = block.timestamp;
+      // check the time of presale
+      if (currentTime > endTime) {
+          // check presale launching
+          if (presales[_id].totalBnbRaised >= presales[_id].launchpadInfo[2]) {
+             return "ended";
+          } else {
+            return "canceled";
+          }
+      } else {
+         return "active";
+      }
+   }
 
    function participate(uint256 _id) payable external {
          // Check if the presale id exists
@@ -169,10 +191,6 @@ contract unisalePresale {
        return wlAddrs[_id][_user];
    }
 
-   function _checkPresaleLaunching(uint _id) public view returns (bool) {
-       return (presales[_id].totalBnbRaised >= presales[_id].launchpadInfo[2] * 1 ether);
-   }
-
    function addWlAddr(uint _id, address _addr) external _checkWhitelist(_id) {
       require(presaleToOwner[msg.sender].length > 0, "you haven't made any presale yet!");
       require(msg.sender == prsIdtoOwner[_id], "You are not founder of this presale.");
@@ -187,43 +205,57 @@ contract unisalePresale {
       wlAddrs[_id][_addr] = false;
    }
    
-   function distributePoolTokens(uint _id, address _token, address _to)
-      external assessAddressPayment(_id, _to) returns (bool) {
-            require(_id <= presales.length - 1, "Presale not found.");
-            // check time that presale ended or no
-            require(block.timestamp > presales[_id].endTime, "Please wait until presale ends, the presale is still running.");
-            // check caller that must be pool address
-            require(presales[_id].pool == msg.sender, 'This function must be called by a pool , no private address.');
-            // check user who is in whitelist or no
-            require(_whitelistValidate(_id, _to), "Could not find your address in the whitelist of this presale!");
-            // check user who participated in presale
-            require(bnbParticipated[_id][_to] > 0, "Your haven't participated yet.");
+   function distributePoolTokens(uint _id, address _recipient)
+      external assessAddressPayment(_id, _recipient) returns (bool) {
 
-            // set _paid for who got tokens
-            uint256 _amount = participateValue(_id, _to);
-            bool _paid =  IERC20(_token).transferFrom(msg.sender, _to, _amount);
-            tokensPaid[_id][_to] = _paid;
-            return _paid;
+            // check that the presale with the given ID exists
+            require(_id <= presales.length - 1, "Presale not found.");
+            
+           // check that the presale has ended
+            require(block.timestamp >= presales[_id].endTime, "Presale is still running.");
+            
+            // check caller that must be pool address
+            require(msg.sender == presales[_id].pool, '"This function must be called by the pool.');
+            
+            // check that the recipient is whitelisted and has participated in the presale
+            require(_whitelistValidate(_id, _recipient), "Address is not whitelisted.");
+            require(bnbParticipated[_id][_recipient] > 0, "Address did not participate in the presale.");
+           
+            // check presale status 
+            require(keccak256(bytes(_returnPresaleStatus(_id))) == keccak256(bytes("ended")), "The bnb's total raised must exceed presale softcap.");
+             
+            // Transfer tokens from the pool to the recipient
+            uint256 amount = participateValue(_id, _recipient);
+            require(IERC20(presales[_id].tokenCA).transferFrom(msg.sender, _recipient, amount), "Failed to transfer tokens.");
+
+            // Update tokensPaid mapping
+            tokensPaid[_id][_recipient] = true;
+
+            return true;
    }
    
    function distributePoolBNB(uint _id, address _poolOwner) external payable returns (bool) {
          require(presales[_id].pool == msg.sender, 'The caller must be one pool.');
          require(msg.value <= presales[_id].totalBnbRaised, 'The value must equal presale total bnb raised.');
-         require(_checkPresaleLaunching(_id), "The bnb's total raised must exceed presale softcap.");
+
+         // to check presale status of pool
+         require(keccak256(bytes(_returnPresaleStatus(_id))) == keccak256(bytes("ended")), "The bnb's total raised must exceed presale softcap.");
          require(block.timestamp > presales[_id].endTime, "Please wait until presale ends, the presale is still running.");
+         
          // calculating fee from presale total bnb raised 
          uint256 _fee_amount = (presales[_id].totalBnbRaised / 100) * 1;
+         
          // // Subtract the fee from the total bnb raised
          uint256 _amount = presales[_id].totalBnbRaised - _fee_amount;
+         
          // pay to presale owner and get 1% of total bnb raised to launchpad owner
          require(payTo(_poolOwner,  _amount) && payTo(companyAcc, _fee_amount), 'payment failed');
          return true;
    }
    
-   function refundBNB(uint _id, address _poolHolder) external payable returns (bool) {
+   function refundBNB(uint _id, address _poolHolder) external payable _checkPresaleLaunching(_id) returns (bool) {
       require(presales[_id].pool == msg.sender, "The caller must be one pool.");
       require(msg.value <= participateValue(_id, _poolHolder), "The value must equal user's bnb participated.");
-      require(!_checkPresaleLaunching(_id), "The presale launched, so you can't refund your bnb.");
       require(block.timestamp > presales[_id].endTime, "Please wait until presale ends, the presale is still running.");
       require(refundsPaid[_id][_poolHolder] == false, 'You have already been refunded.');
       // Subtract the value of user participated in.
@@ -237,16 +269,16 @@ contract unisalePresale {
       return true;
    }
 
-   function refundTokens(uint _id, address _poolOwner) external returns (bool) {
-      require(presales[_id].pool == msg.sender, "The caller must be one pool.");
-      require(!_checkPresaleLaunching(_id), "The presale launched, so you can't refund your tokens.");
-      require(block.timestamp > presales[_id].endTime, "Please wait until presale ends, the presale is still running.");
-      // calculating amount that we want send to user that participated in presale 
-      uint256 _amount = IERC20(presales[_id].tokenCA).balanceOf(presales[_id].pool);
-      // paying tokens to presales owner 
-      bool _pay = IERC20(presales[_id].tokenCA).transferFrom(presales[_id].pool, _poolOwner, _amount);
-      // check all steps for sure 
-      return _pay;
+   function refundTokens(uint _id, address _poolOwner) 
+       external _checkPresaleLaunching(_id) returns (bool) {
+          require(presales[_id].pool == msg.sender, "The caller must be one pool.");
+          require(block.timestamp > presales[_id].endTime, "Please wait until presale ends, the presale is still running.");
+          // calculating amount that we want send to user that participated in presale 
+          uint256 _amount = IERC20(presales[_id].tokenCA).balanceOf(presales[_id].pool);
+          // paying tokens to presales owner 
+          bool _pay = IERC20(presales[_id].tokenCA).transferFrom(presales[_id].pool, _poolOwner, _amount);
+          // check all steps for sure 
+          return _pay;
    }
    
    function payTo(address _to, uint256 _amount) internal returns (bool) {
