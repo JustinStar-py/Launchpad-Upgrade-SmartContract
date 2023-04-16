@@ -15,7 +15,7 @@
 <li> Public Sell </p>
 
 
-
+<h2> _________________________________ </h2>
 
 
 <h4> Using this function for creating new presale</h4>
@@ -30,7 +30,7 @@ function CreatePresale (
      address next_pool
    ) {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contract.sol#L94'>...</a>}
  </pre>
- <titel> Line 94 </title>
+ <p> Line 94 </p>
  
  
  
@@ -40,7 +40,7 @@ function CreatePresale (
  function participate(uint256 _id)
       payable external {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contract.sol#L153'>...}
  </pre>
-<title> Line 153 </title>
+<p> Line 153 </p>
 
 
 
@@ -53,7 +53,7 @@ function CreatePresale (
   )
       external assessAddressPayment(_id, _recipient) returns (bool) {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contract.sol#L208'>...</a>}
 </pre>
-<title> Line 208 </title>
+<p> Line 208 </p>
 
 
 
@@ -64,5 +64,5 @@ function CreatePresale (
     address _poolOwner
   ) external payable returns (bool) {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contract.sol#L237'>...</a>}
 </pre>
-<title> Line 237 </title>
+<p> Line 237 </p>
 
