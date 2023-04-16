@@ -5,17 +5,17 @@
 <h5>This contract whats includes?<p>
 
 
-<li> + Time Locker </p>
-<li> + BNB Locker </p>
-<li> + LIQ Locker </p>
-<li> + Token Paying </p>
-<li> + BNB Paying </p>
-<li> + Whitelist Method </p>
-<li> + Private Sell </p>
-<li> + Public Sell </p>
+<li> Time Locker </p>
+<li> BNB Locker </p>
+<li> LIQ Locker </p>
+<li> Token Paying </p>
+<li> BNB Paying </p>
+<li> Whitelist Method </p>
+<li> Private Sell </p>
+<li> Public Sell </p>
 
 <h4> Using this function for creating new presale</h4>
-<code>
+<div>
 function CreatePresale ( 
      address _tokenCA,uint256[6] memory _launchpadInfo, 
      string[4] memory _Additional,  
@@ -24,5 +24,5 @@ function CreatePresale (
      address _pool, 
      address next_pool
    ) 
- </code>
+ </div>
  <titel> Line 129 </title>
