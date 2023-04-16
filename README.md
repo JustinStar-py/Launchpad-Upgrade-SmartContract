@@ -14,7 +14,12 @@
 <li> Private Sell </p>
 <li> Public Sell </p>
 
+
+
+
+
 <h4> Using this function for creating new presale</h4>
+
 <pre>
 function CreatePresale ( 
      address _tokenCA,uint256[6] memory _launchpadInfo, 
@@ -23,6 +28,41 @@ function CreatePresale (
      uint _startTime, 
      address _pool, 
      address next_pool
-   ) 
+   ) {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contract.sol#L94'>...</a>}
  </pre>
- <titel> Line 129 </title>
+ <titel> Line 94 </title>
+ 
+ 
+ 
+ <h4> Using this function for participate in presale</h4>
+
+ <pre>
+ function participate(uint256 _id)
+      payable external {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contract.sol#L153'>...}
+ </pre>
+<title> Line 153 </title>
+
+
+
+<h4> Using this function for get tokens</h4>
+
+<pre>
+   function distributePoolTokens(
+     uint _id, 
+     address _recipient
+  )
+      external assessAddressPayment(_id, _recipient) returns (bool) {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contract.sol#L208'>...</a>}
+</pre>
+<title> Line 208 </title>
+
+
+
+<h4> Using this function for paying bnb to owner of presale</h4>
+<pre>
+ function distributePoolBNB(
+    uint _id,
+    address _poolOwner
+  ) external payable returns (bool) {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contract.sol#L237'>...</a>}
+</pre>
+<title> Line 237 </title>
+
