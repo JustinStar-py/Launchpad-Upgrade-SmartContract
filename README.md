@@ -54,7 +54,7 @@ function CreatePresale (
 
  <pre>
  function participate(uint256 _id)
-      payable external {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contract.sol#L153'>...}
+      payable external {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contract.sol#L153'>...</a>}
  </pre>
 <em> Line 153 </em>
 
