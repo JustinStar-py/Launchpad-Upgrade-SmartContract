@@ -1,6 +1,7 @@
+# PresaleSolidityContract
+<h3>PresaleSolidityContract<h3>
+<h4>Wrritten by Solidity 8.17V </h5>
 # Sample Hardhat Project
-
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
 
 Try running some of the following tasks:
 
@@ -12,13 +13,9 @@ npx hardhat node
 npx hardhat run scripts/deploy.js
 ```
 
-# PresaleSolidityContract
-<h3>PresaleSolidityContract<h3>
-<h4>Wrritten by Solidity 8.17V </h5>
-# Sample Hardhat Project
+
 
 <h5>This contract whats includes?<p>
-
 
 <li> Time Locker </p>
 <li> BNB Locker </p>
