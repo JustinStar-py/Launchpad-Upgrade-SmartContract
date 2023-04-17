@@ -4,16 +4,17 @@
 # Sample Hardhat Project
 
 
-<h5>This contract whats includes?<p>
-
-<li> Time Locker </p>
-<li> BNB Locker </p>
-<li> LIQ Locker </p>
-<li> Token Paying </p>
-<li> BNB Paying </p>
-<li> Whitelist Method </p>
-<li> Private Sell </p>
-<li> Public Sell </p>
+<h5>This contract whats includes?</h5>
+<ul>
+  <li> Time Locker </p>
+  <li> BNB Locker </p>
+  <li> LIQ Locker </p>
+  <li> Token Paying </p>
+  <li> BNB Paying </p>
+  <li> Whitelist Method </p>
+  <li> Private Sell </p>
+  <li> Public Sell </p>
+</ul>
 
 
 Try running some of the following tasks:
