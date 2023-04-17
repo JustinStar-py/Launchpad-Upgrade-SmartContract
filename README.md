@@ -30,7 +30,7 @@ npx hardhat run scripts/deploy.js
 
 
 
-<h3> Code Docs </h3>
+<h2> Code Docs 📄</h2>
 
 
 <h4> Using this function for creating new presale</h4>
