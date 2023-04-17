@@ -3,17 +3,6 @@
 <h4>Wrritten by Solidity 8.17V </h5>
 # Sample Hardhat Project
 
-Try running some of the following tasks:
-
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.js
-```
-
-
 
 <h5>This contract whats includes?<p>
 
@@ -27,8 +16,17 @@ npx hardhat run scripts/deploy.js
 <li> Public Sell </p>
 
 
+Try running some of the following tasks:
 
-<h2> _________________________________ </h2>
+
+```shell
+npx hardhat help
+npx hardhat test
+REPORT_GAS=true npx hardhat test
+npx hardhat node
+npx hardhat run scripts/deploy.js
+```
+
 
 
 <h4> Using this function for creating new presale</h4>
