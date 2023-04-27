@@ -44,7 +44,7 @@ function CreatePresale (
      uint _startTime, 
      address _pool, 
      address next_pool
-   ) {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contract.sol#L94'>...</a>}
+   ) {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contracts/Presale.sol#L94'>...</a>}
  </pre>
  > Line 94 
 
@@ -54,7 +54,7 @@ function CreatePresale (
 
  <pre>
  function participate(uint256 _id)
-      payable external {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contract.sol#L153'>...</a>}
+      payable external {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contracts/Presale.sol#L153'>...</a>}
  </pre>
 > Line 153 
 
@@ -67,7 +67,7 @@ function CreatePresale (
      uint _id, 
      address _recipient
   )
-      external assessAddressPayment(_id, _recipient) returns (bool) {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contract.sol#L208'>...</a>}
+      external assessAddressPayment(_id, _recipient) returns (bool) {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contracts/Presale.sol#L208'>...</a>}
 </pre>
 > Line 208 
 
@@ -78,10 +78,10 @@ function CreatePresale (
  function distributePoolBNB(
     uint _id,
     address _poolOwner
-  ) external payable returns (bool) {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contract.sol#L237'>...</a>}
+  ) external payable returns (bool) {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contracts/Presale.sol#L237'>...</a>}
 </pre>
 
-> Line 208 
+> Line 237 
 
 --- 
 <h5>for more help email me : <a href="mailto:example@example.com?subject=Presale%20repository">Justinstar-py@gmailcom</a></h5>
