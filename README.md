@@ -83,4 +83,4 @@ function CreatePresale (
 > Line 237 
 
 --- 
-<h5>for more help email me : Justinstar-py@gmail.com</h5>
+<h5>for more help email me : <a href:"mailto:Justinstar-py@gmail.com">Justinstar-py@gmail.com</a></h5>
