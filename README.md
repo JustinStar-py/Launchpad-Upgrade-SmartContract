@@ -81,3 +81,6 @@ function CreatePresale (
   ) external payable returns (bool) {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contract.sol#L237'>...</a>}
 </pre>
 > Line 237 
+
+--- 
+<h5>for more help email me : Justinstar-py@gmail.com</h5>
