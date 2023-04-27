@@ -80,7 +80,8 @@ function CreatePresale (
     address _poolOwner
   ) external payable returns (bool) {<a href='https://github.com/JustinStar-py/Private-Sell-Solidity-Contract/blob/main/contract.sol#L237'>...</a>}
 </pre>
-> Line 237 
+
+> Line 208 
 
 --- 
 <h5>for more help email me : <a href:"mailto:Justinstar-py@gmail.com">Justinstar-py@gmail.com</a></h5>
