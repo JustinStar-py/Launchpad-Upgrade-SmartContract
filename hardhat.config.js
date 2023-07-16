@@ -32,7 +32,7 @@ module.exports = {
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://bscscan.com/
-    apiKey: process.env.ETHERSCAN_API
+    apiKey: process.env.BSCSCAB_API
   },
   solidity: {
     version: "0.8.17",

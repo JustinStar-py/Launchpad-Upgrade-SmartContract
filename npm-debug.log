@@ -1,0 +1,54 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/local/bin/node',
+1 verbose cli   '/usr/local/bin/npm',
+1 verbose cli   'install',
+1 verbose cli   '-g',
+1 verbose cli   'n' ]
+2 info using npm@1.2.11
+3 info using node@v0.8.21
+4 verbose read json /usr/local/lib/package.json
+5 verbose read json /usr/local/lib/package.json
+6 verbose cache add [ 'n', null ]
+7 verbose cache add name=undefined spec="n" args=["n",null]
+8 verbose parsed url { pathname: 'n', path: 'n', href: 'n' }
+9 silly lockFile d1854cae-n n
+10 verbose lock n /root/.npm/d1854cae-n.lock
+11 silly lockFile d1854cae-n n
+12 silly lockFile d1854cae-n n
+13 verbose addNamed [ 'n', '' ]
+14 verbose addNamed [ null, '' ]
+15 silly lockFile 6b58d7dc-n n@
+16 verbose lock n@ /root/.npm/6b58d7dc-n.lock
+17 silly addNameRange { name: 'n', range: '', hasData: false }
+18 verbose url raw n
+19 verbose url resolving [ 'https://registry.npmjs.org/', './n' ]
+20 verbose url resolved https://registry.npmjs.org/n
+21 info trying registry request attempt 1 at 16:30:33
+22 http GET https://registry.npmjs.org/n
+23 info retry will retry, error on last attempt: Error: 140480786593600:error:1407742E:SSL routines:SSL23_GET_SERVER_HELLO:tlsv1 alert protocol version:../deps/openssl/openssl/ssl/s23_clnt.c:658:
+24 info trying registry request attempt 2 at 16:30:43
+25 http GET https://registry.npmjs.org/n
+26 info retry will retry, error on last attempt: Error: 140480786593600:error:1407742E:SSL routines:SSL23_GET_SERVER_HELLO:tlsv1 alert protocol version:../deps/openssl/openssl/ssl/s23_clnt.c:658:
+27 info trying registry request attempt 3 at 16:31:43
+28 http GET https://registry.npmjs.org/n
+29 silly lockFile 6b58d7dc-n n@
+30 silly lockFile 6b58d7dc-n n@
+31 error Error: 140480786593600:error:1407742E:SSL routines:SSL23_GET_SERVER_HELLO:tlsv1 alert protocol version:../deps/openssl/openssl/ssl/s23_clnt.c:658:
+31 error
+31 error     at CleartextStream._puller (tls.js:667:24)
+31 error     at CleartextStream.CryptoStream._pull (tls.js:601:19)
+31 error     at SecurePair.cycle (tls.js:891:20)
+31 error     at EncryptedStream.CryptoStream.write (tls.js:285:13)
+31 error     at Socket.ondata (stream.js:38:26)
+31 error     at Socket.EventEmitter.emit (events.js:96:17)
+31 error     at TCP.onread (net.js:397:14)
+32 error If you need help, you may report this log at:
+32 error     <http://github.com/isaacs/npm/issues>
+32 error or email it to:
+32 error     <npm-@googlegroups.com>
+33 error System Linux 5.4.0-153-generic
+34 error command "/usr/local/bin/node" "/usr/local/bin/npm" "install" "-g" "n"
+35 error cwd /root/Launchpad-Upgrade-SmartContract
+36 error node -v v0.8.21
+37 error npm -v 1.2.11
+38 verbose exit [ 1, true ]
