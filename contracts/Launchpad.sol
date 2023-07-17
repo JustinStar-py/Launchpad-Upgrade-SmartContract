@@ -1,37 +1,34 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/proxy/Clones.sol";
+import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 
 contract CloneFactory {
-    address[] public totalAddress;
-    address public template;
+    address[] public contractsArray;
 
-    constructor(address _template) {
-        template = _template;
-    }
+    function createClone(uint256 number, address target) external returns (address) {
+        address clone = Clones.clone(target);
+        SimpleContract(clone).initialize(number);
 
-    function createClone(uint256 arg1, string memory arg2) external returns (address result) {
-        address clone = Clones.clone(template);
-        totalAddress.push(clone);
-
-        YourContract(clone).initialize(arg1, arg2);
+        contractsArray.push(clone);
 
         return clone;
     }
 }
 
-contract YourContract {
-    uint256 public value;
-    string public message;
+contract SimpleContract is Initializable {
+    uint public value;
 
-    constructor() {
+    function initialize(uint256 number) external {
+        value = number;
     }
 
-    function initialize(uint256 _value, string memory _message) external {
-        require(value == 0 && bytes(message).length == 0, "Contract already initialized");
+    function setValue(uint newValue) external {
+        value = newValue;
+    }
 
-        value = _value;
-        message = _message;
+    function getValue() external view returns (uint) {
+        return value;
     }
 }
