@@ -7,7 +7,7 @@ import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 
 contract unisalePresale is Initializable {
     using SafeMath for uint256;
-   
+    
     address public tokenContractAddress;
     uint256 public id;
     uint[6] padConfiguration;
@@ -16,7 +16,8 @@ contract unisalePresale is Initializable {
     uint256 public endTime;
     uint256 public startTime;
     uint256 public totalBnbRaised;
-    
+    address public padOwner;
+
     function initialize (
          address _tokenContractAddress,
          uint _id,
@@ -25,7 +26,8 @@ contract unisalePresale is Initializable {
          bool _whitelistOption,
          uint256 _endTime,
          uint256 _startTime,
-         uint256 _totalBnbRaised
+         uint256 _totalBnbRaised,
+         address _padOwner
       ) external {
            tokenContractAddress = _tokenContractAddress;
            id = _id;
@@ -35,13 +37,14 @@ contract unisalePresale is Initializable {
            endTime = _endTime;
            startTime = _startTime;
            totalBnbRaised = _totalBnbRaised;
+           padOwner = _padOwner;
     }
 
     mapping (address => bool) public tokenRecipients;
-    mapping (address => bool) public whitelistValidity;
+    mapping (address => bool) public whitelistMembership;
     mapping (address => uint256) public usersContributions;
 
-    modifier _whitelistChecker() {
+    modifier whitelistChecker() {
          require(whitelistOption, "The presale doesn't have whitelist method");
          _;
    }
@@ -52,8 +55,8 @@ contract unisalePresale is Initializable {
       _;
    }
 
-    function _whitelistValidate(address _user) internal view returns (bool) {
-       return whitelistValidity[_user];
+    function whitelistValidate(address _user) internal view returns (bool) {
+       return whitelistMembership[_user];
    }
 
     function participate() payable external {
@@ -74,7 +77,7 @@ contract unisalePresale is Initializable {
          require(poolBalance >= 1 ether, 'As of right now, there are no tokens in pool.');
          // Send payment
          if (whitelistOption) {
-            require(_whitelistValidate(msg.sender) == true,"Your address is not in whitelist of address(this) presale.");
+            require(whitelistValidate(msg.sender) == true,"Your address is not in whitelist of address(this) presale.");
             usersContributions[msg.sender] = msg.value;
             totalBnbRaised += msg.value;
             // pay to pool of pool owner
@@ -85,10 +88,49 @@ contract unisalePresale is Initializable {
             payTo(address(this), msg.value);
          }
    }
-    
+
+    function participateValue(address _addr) internal view returns (uint) {
+      return usersContributions[_addr] * padConfiguration[0];
+   }
+   
+    function addWlAddr(address _addr) external whitelistChecker {
+      require(msg.sender == padOwner, "You are not founder of this presale.");
+      require(!whitelistValidate(_addr), "Address already exists in whitelist!");
+      whitelistMembership[_addr] = true;
+   }
+   
+    function removeWlAddr(address _addr) external whitelistChecker {
+      require(msg.sender == padOwner, "You are not founder of this presale.");
+      require(whitelistValidate(_addr), "Could not find address in this whitelist.");
+      whitelistMembership[_addr] = false;
+   }
+
+   function distributePoolTokens(address _recipient)
+      external assessAddressPayment(_recipient) returns (bool) {
+
+         // check that the presale has ended
+         require(block.timestamp >= endTime, "Presale is still running.");
+         
+         // check that the recipient is whitelisted and has participated in the presale
+         require(whitelistValidate(_recipient), "Address is not whitelisted.");
+         require(usersContributions[_recipient] > 0, "Address did not participate in the presale.");
+      
+         // // check presale status 
+         // require(keccak256(bytes(_returnPresaleStatus(_id))) == keccak256(bytes("ended")), "The bnb's total raised must exceed presale softcap.");
+         
+         // Transfer tokens from the pool to the recipient
+         uint256 amount = participateValue(_recipient);
+         require(IERC20(tokenContractAddress).transferFrom(address(this), _recipient, amount), "Failed to transfer tokens.");
+
+         // Update tokensPaid mapping
+         // tokensPaid[_id][_recipient] = true;
+
+         return true;
+   }
+
    function payTo(address _to, uint256 _amount) internal returns (bool) {
-        (bool success,) = payable(_to).call{value: _amount}("");
-        require(success, "Payment failed");
-        return true;
+      (bool success,) = payable(_to).call{value: _amount}("");
+      require(success, "Payment failed");
+      return true;
    }
 }
