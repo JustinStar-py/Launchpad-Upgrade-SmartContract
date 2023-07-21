@@ -13,6 +13,7 @@ module.exports = {
       },
       testnet: {
         url: "https://clean-restless-feather.bsc-testnet.discover.quiknode.pro/395608a8a3773bdc951423350b76ea030cc43cae/",
+        // url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
         chainId: 97,
         gasPrice: 20000000000,
         accounts: [process.env.BSC_ACC,]

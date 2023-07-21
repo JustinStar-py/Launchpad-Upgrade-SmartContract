@@ -10,7 +10,7 @@ contract Pad is Initializable {
     
     address public tokenContractAddress;
     uint256 public id;
-    uint[6] padConfiguration;
+    uint[5] padConfiguration;
     string[3] padDetails;
     bool whitelistOption;
     uint256 public endTime;
@@ -19,9 +19,9 @@ contract Pad is Initializable {
     address public padOwner;
 
     function initialize (
-         address _tokenContractAddress,
          uint _id,
-         uint256[6] memory _padConfiguration,
+         address _tokenContractAddress,
+         uint256[5] memory _padConfiguration,
          string[3] memory _padDetails,
          bool _whitelistOption,
          uint256 _endTime,
@@ -44,7 +44,7 @@ contract Pad is Initializable {
     mapping (address => bool) public whitelistMembership;
     mapping (address => uint256) public usersContributions;
 
-    modifier whitelistChecker() {
+   modifier whitelistChecker() {
          require(whitelistOption, "The presale doesn't have whitelist method");
          _;
    }
@@ -59,13 +59,17 @@ contract Pad is Initializable {
        return whitelistMembership[_user];
    }
 
+    function participateValue(address _addr) internal view returns (uint) {
+      return usersContributions[_addr] * padConfiguration[0];
+   }
+
     function participate() payable external {
          // Check presale start and end time
          require(block.timestamp > startTime, "The presale not started yet.");
          require(block.timestamp < endTime, "The presale has been ended before.");
          // Enforce minimum and maximum buy-in amount
-         require(msg.value >= padConfiguration[4], "The value should be more than min-buy!");
-         require(msg.value <= padConfiguration[5] * 1 ether, "The value should be lower than max-buy!");
+         require(msg.value >= padConfiguration[3], "The value should be more than min-buy!");
+         require(msg.value <= padConfiguration[4] * 1 ether, "The value should be lower than max-buy!");
          // check presale launched or no
          require(block.timestamp < endTime , "The presale has not started, wait until the presale starts.");
          // check user participated or no
@@ -87,10 +91,6 @@ contract Pad is Initializable {
             totalBnbRaised += msg.value;
             payTo(address(this), msg.value);
          }
-   }
-
-    function participateValue(address _addr) internal view returns (uint) {
-      return usersContributions[_addr] * padConfiguration[0];
    }
    
     function addWlAddr(address _addr) external whitelistChecker {
