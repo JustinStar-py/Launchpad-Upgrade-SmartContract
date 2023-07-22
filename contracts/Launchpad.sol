@@ -36,10 +36,8 @@ contract CloneFactory {
    }
     
     
-   // uint256 public feePoolPrice = 0.1 ether;
-   uint256 public feePoolPrice = 100 ether;
-   // address public companyAcc = 0x54a6963429c65097E51d429662dC730517e630d5;
-   address public companyAcc = 0x70997970C51812dc3A010C7d01b50e0d17dc79C8;
+   uint256 public feePoolPrice = 0.1 ether;
+   address public companyAcc = 0x54a6963429c65097E51d429662dC730517e630d5;
    
    padInfo[] public totalPads;
    mapping(address => padInfo[]) public padOwners;
@@ -94,8 +92,8 @@ contract CloneFactory {
       return _padOwners;
    }
    
-   function _getOwnerPresalesCount() public view returns (uint) {
-      uint count = padOwners[msg.sender].length;
+   function _getOwnerPresalesCount(address requiredOwner) public view returns (uint) {
+      uint count = padOwners[requiredOwner].length;
       return count;
    }
 
@@ -103,21 +101,6 @@ contract CloneFactory {
       return totalPads.length;
    }
 
-   function _returnPresaleStatus(uint _id) public view returns (string memory) {
-      uint endTime = totalPads[_id].endTime;
-      uint currentTime = block.timestamp;
-      // check the time of presale
-      if (currentTime > endTime) {
-          // check presale launching
-          if (totalPads[_id].totalBnbRaised >= totalPads[_id].padConfiguration[2]) {
-             return "ended";
-          } else {
-            return "canceled";
-          }
-      } else {
-         return "active";
-      }
-   }
 }
 
 contract initialPad is Initializable {

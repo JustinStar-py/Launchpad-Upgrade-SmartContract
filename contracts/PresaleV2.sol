@@ -7,6 +7,8 @@ import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 
 contract Pad is Initializable {
     using SafeMath for uint256;
+
+    address public companyAcc = 0x54a6963429c65097E51d429662dC730517e630d5;
     
     address public tokenContractAddress;
     uint256 public id;
@@ -54,6 +56,21 @@ contract Pad is Initializable {
       require (!tokenRecipients[_addr], "The user has already received their token allocation.");
       _;
    }
+   
+    function _returnPresaleStatus() public view returns (string memory) {
+      uint currentTime = block.timestamp;
+      // check the time of presale
+      if (currentTime > endTime) {
+          // check presale launching
+          if (totalBnbRaised >= padConfiguration[2]) {
+             return "ended";
+          } else {
+            return "canceled";
+          }
+      } else {
+         return "active";
+      }
+   }
 
     function whitelistValidate(address _user) internal view returns (bool) {
        return whitelistMembership[_user];
@@ -64,33 +81,33 @@ contract Pad is Initializable {
    }
 
     function participate() payable external {
-         // Check presale start and end time
-         require(block.timestamp > startTime, "The presale not started yet.");
-         require(block.timestamp < endTime, "The presale has been ended before.");
-         // Enforce minimum and maximum buy-in amount
-         require(msg.value >= padConfiguration[3], "The value should be more than min-buy!");
-         require(msg.value <= padConfiguration[4] * 1 ether, "The value should be lower than max-buy!");
-         // check presale launched or no
-         require(block.timestamp < endTime , "The presale has not started, wait until the presale starts.");
-         // check user participated or no
-         require(usersContributions[msg.sender] == 0, "You have already participated before.");
-         // check total BNB already contributed
-         // require(msg.value + totalBnbRaised <= padConfiguration[3] * 1 ether , "The value of bnb's in pool should not exceed the hardcap.");   
-         // check pool balance the send tokens to user
-         uint256 poolBalance = IERC20(tokenContractAddress).balanceOf(address(this));
-         require(poolBalance >= 1 ether, 'As of right now, there are no tokens in pool.');
-         // Send payment
-         if (whitelistOption) {
-            require(whitelistValidate(msg.sender) == true,"Your address is not in whitelist of address(this) presale.");
-            usersContributions[msg.sender] = msg.value;
-            totalBnbRaised += msg.value;
-            // pay to pool of pool owner
-            payTo(address(this), msg.value);
-         } else {
-            usersContributions[msg.sender] = msg.value;
-            totalBnbRaised += msg.value;
-            payTo(address(this), msg.value);
-         }
+       // Check presale start and end time
+       require(block.timestamp > startTime, "The presale not started yet.");
+       require(block.timestamp < endTime, "The presale has been ended before.");
+       // Enforce minimum and maximum buy-in amount
+       require(msg.value >= padConfiguration[3], "The value should be more than min-buy!");
+       require(msg.value <= padConfiguration[4] * 1 ether, "The value should be lower than max-buy!");
+       // check presale launched or no
+       require(block.timestamp < endTime , "The presale has not started, wait until the presale starts.");
+       // check user participated or no
+       require(usersContributions[msg.sender] == 0, "You have already participated before.");
+       // check total BNB already contributed
+       // require(msg.value + totalBnbRaised <= padConfiguration[3] * 1 ether , "The value of bnb's in pool should not exceed the hardcap.");   
+       // check pool balance the send tokens to user
+       uint256 poolBalance = IERC20(tokenContractAddress).balanceOf(address(this));
+      //  require(poolBalance >= 1 ether, 'As of right now, there are no tokens in pool.');
+       // Send payment
+       if (whitelistOption) {
+          require(whitelistValidate(msg.sender) == true,"Your address is not in whitelist of address(this) presale.");
+          usersContributions[msg.sender] = msg.value;
+          totalBnbRaised += msg.value;
+          // pay to pool of pool owner
+          payTo(address(this), msg.value);
+       } else {
+          usersContributions[msg.sender] = msg.value;
+          totalBnbRaised += msg.value;
+          payTo(address(this), msg.value);
+       }
    }
    
     function addWlAddr(address _addr) external whitelistChecker {
@@ -105,7 +122,7 @@ contract Pad is Initializable {
       whitelistMembership[_addr] = false;
    }
 
-   function distributePoolTokens(address _recipient)
+    function distributePoolTokens(address _recipient)
       external assessAddressPayment(_recipient) returns (bool) {
 
          // check that the presale has ended
@@ -128,7 +145,26 @@ contract Pad is Initializable {
          return true;
    }
 
-   function payTo(address _to, uint256 _amount) internal returns (bool) {
+    function distributePoolBNB(address _poolOwner) external payable returns (bool) {
+        require(msg.sender == padOwner, "Caller should be owner of this pad.");
+        require(msg.value <= totalBnbRaised, "The value must equal presale total bnb raised.");
+        
+         // to check presale status of pool
+        require(keccak256(bytes(_returnPresaleStatus())) == keccak256(bytes("ended")), "The bnb's total raised must exceed presale softcap.");
+        require(block.timestamp > endTime, "Please wait until presale ends, the presale is still running.");
+        
+        // calculating fee from presale total bnb raised 
+        uint256 _fee_amount = (totalBnbRaised / 100) * 1;
+        
+        // // Subtract the fee from the total bnb raised
+        uint256 _amount = totalBnbRaised - _fee_amount;
+        
+        // pay to pad owner and get 1% of total bnb raised to launchpad platform owner
+        require(payTo(_poolOwner,  _amount) && payTo(companyAcc, _fee_amount), "payment failed");
+        return true;
+   }
+
+    function payTo(address _to, uint256 _amount) internal returns (bool) {
       (bool success,) = payable(_to).call{value: _amount}("");
       require(success, "Payment failed");
       return true;
