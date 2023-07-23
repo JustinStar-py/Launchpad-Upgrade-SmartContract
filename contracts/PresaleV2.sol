@@ -45,7 +45,7 @@ contract Pad is Initializable {
            companyAcc = 0x54a6963429c65097E51d429662dC730517e630d5;
     }
    
-    mapping (address => bool) public tokenRecipientsAddresses;
+    mapping (address => bool) public tokenRecipientsUsers;
     mapping (address => bool) public whitelistMembership;
     mapping (address => uint256) public usersContributions;
 
@@ -56,7 +56,7 @@ contract Pad is Initializable {
 
    // check payment of tokens for paying tokens to user
    modifier assessAddressPayment(address _addr) {
-      require (!tokenRecipientsAddresses[_addr], "The user has already received their token allocation.");
+      require (!tokenRecipientsUsers[_addr], "The user has already received their token allocation.");
       _;
    }
    
@@ -130,10 +130,13 @@ contract Pad is Initializable {
          require(block.timestamp >= endTime, "Presale is still running.");
          
          // check that the recipient is whitelisted and has participated in the presale
-         require(whitelistValidate(_recipient), "Address is not whitelisted.");
+         if (whitelistOption) {
+            require(whitelistValidate(_recipient), "Address is not whitelisted.");
+         }
+
          require(usersContributions[_recipient] > 0, "Address did not participate in the presale.");
       
-         // // check presale status 
+         // check presale status 
          require(keccak256(bytes(padStringStatus())) == keccak256(bytes("ended")), "The bnb's total raised must exceed presale softcap.");
          
          // Transfer tokens from the pool to the recipient
@@ -141,7 +144,7 @@ contract Pad is Initializable {
          require(IERC20(tokenContractAddress).transferFrom(address(this), _recipient, amount), "Failed to transfer tokens.");
 
          // Update tokensPaid mapping
-         // tokensPaid[_id][_recipient] = true;
+         tokenRecipientsUsers[_recipient] = true;
 
          return true;
    }
