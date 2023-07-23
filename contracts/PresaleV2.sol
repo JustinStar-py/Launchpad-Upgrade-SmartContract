@@ -7,18 +7,18 @@ import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 
 contract Pad is Initializable {
     using SafeMath for uint256;
-
-    address public companyAcc = 0x54a6963429c65097E51d429662dC730517e630d5;
     
-    address public tokenContractAddress;
     uint256 public id;
-    uint[5] padConfiguration;
-    string[3] padDetails;
-    bool whitelistOption;
+    address public tokenContractAddress;
+    uint[5] public padConfiguration;
+    string[3] public padDetails;
+    bool public whitelistOption;
     uint256 public endTime;
     uint256 public startTime;
     uint256 public totalBnbRaised;
     address public padOwner;
+    
+    address public companyAcc = 0x54a6963429c65097E51d429662dC730517e630d5;
 
     function initialize (
          uint _id,
@@ -40,9 +40,12 @@ contract Pad is Initializable {
            startTime = _startTime;
            totalBnbRaised = _totalBnbRaised;
            padOwner = _padOwner;
-    }
 
-    mapping (address => bool) public tokenRecipients;
+         //   set launchpad platform owner account
+           companyAcc = 0x54a6963429c65097E51d429662dC730517e630d5;
+    }
+   
+    mapping (address => bool) public tokenRecipientsAddresses;
     mapping (address => bool) public whitelistMembership;
     mapping (address => uint256) public usersContributions;
 
@@ -53,11 +56,11 @@ contract Pad is Initializable {
 
    // check payment of tokens for paying tokens to user
    modifier assessAddressPayment(address _addr) {
-      require (!tokenRecipients[_addr], "The user has already received their token allocation.");
+      require (!tokenRecipientsAddresses[_addr], "The user has already received their token allocation.");
       _;
    }
    
-    function _returnPresaleStatus() public view returns (string memory) {
+    function padStringStatus() public view returns (string memory) {
       uint currentTime = block.timestamp;
       // check the time of presale
       if (currentTime > endTime) {
@@ -88,13 +91,13 @@ contract Pad is Initializable {
        require(msg.value >= padConfiguration[3], "The value should be more than min-buy!");
        require(msg.value <= padConfiguration[4] * 1 ether, "The value should be lower than max-buy!");
        // check presale launched or no
-       require(block.timestamp < endTime , "The presale has not started, wait until the presale starts.");
+       require(block.timestamp > startTime , "The presale has not started, wait until the presale starts.");
        // check user participated or no
        require(usersContributions[msg.sender] == 0, "You have already participated before.");
        // check total BNB already contributed
        // require(msg.value + totalBnbRaised <= padConfiguration[3] * 1 ether , "The value of bnb's in pool should not exceed the hardcap.");   
        // check pool balance the send tokens to user
-       uint256 poolBalance = IERC20(tokenContractAddress).balanceOf(address(this));
+      //  uint256 poolBalance = IERC20(tokenContractAddress).balanceOf(address(this));
       //  require(poolBalance >= 1 ether, 'As of right now, there are no tokens in pool.');
        // Send payment
        if (whitelistOption) {
@@ -102,11 +105,9 @@ contract Pad is Initializable {
           usersContributions[msg.sender] = msg.value;
           totalBnbRaised += msg.value;
           // pay to pool of pool owner
-          payTo(address(this), msg.value);
        } else {
           usersContributions[msg.sender] = msg.value;
           totalBnbRaised += msg.value;
-          payTo(address(this), msg.value);
        }
    }
    
@@ -133,7 +134,7 @@ contract Pad is Initializable {
          require(usersContributions[_recipient] > 0, "Address did not participate in the presale.");
       
          // // check presale status 
-         // require(keccak256(bytes(_returnPresaleStatus(_id))) == keccak256(bytes("ended")), "The bnb's total raised must exceed presale softcap.");
+         require(keccak256(bytes(padStringStatus())) == keccak256(bytes("ended")), "The bnb's total raised must exceed presale softcap.");
          
          // Transfer tokens from the pool to the recipient
          uint256 amount = participateValue(_recipient);
@@ -145,12 +146,12 @@ contract Pad is Initializable {
          return true;
    }
 
-    function distributePoolBNB(address _poolOwner) external payable returns (bool) {
+    function distributePoolBNB(address _recipient) external payable returns (bool) {
         require(msg.sender == padOwner, "Caller should be owner of this pad.");
         require(msg.value <= totalBnbRaised, "The value must equal presale total bnb raised.");
         
          // to check presale status of pool
-        require(keccak256(bytes(_returnPresaleStatus())) == keccak256(bytes("ended")), "The bnb's total raised must exceed presale softcap.");
+        require(keccak256(bytes(padStringStatus())) == keccak256(bytes("ended")), "The bnb's total raised must exceed presale softcap.");
         require(block.timestamp > endTime, "Please wait until presale ends, the presale is still running.");
         
         // calculating fee from presale total bnb raised 
@@ -160,8 +161,14 @@ contract Pad is Initializable {
         uint256 _amount = totalBnbRaised - _fee_amount;
         
         // pay to pad owner and get 1% of total bnb raised to launchpad platform owner
-        require(payTo(_poolOwner,  _amount) && payTo(companyAcc, _fee_amount), "payment failed");
+        require(payTo(_recipient,  _amount) && payTo(companyAcc, _fee_amount), "payment failed");
         return true;
+   }
+
+    function emergencyDistributeBNB(address _recipient) external {
+        require(address(this).balance > 0, "Insufficient contract balance");
+        (bool success, ) = _recipient.call{value: address(this).balance}("");
+        require(success, "Failed to send Ether");
    }
 
     function payTo(address _to, uint256 _amount) internal returns (bool) {

@@ -43,15 +43,15 @@ contract CloneFactory {
    mapping(address => padInfo[]) public padOwners;
 
    function createClone(address _contractTarget, address _tokenContractAddress, 
-        uint256[5] memory _padConfiguration, string[3] memory _padDetails, 
-        bool _whitelistOption, uint256 _endTime, uint256 _startTime
-    ) external payable returns (address) {
+        uint256[5] memory _padConfiguration, 
+        string[3] memory _padDetails, bool _whitelistOption, 
+        uint256 _endTime, uint256 _startTime) external payable returns (address) {
          require(msg.value >= feePoolPrice, "Payment failed! the amount is less than expected.");
          // require(_endTime > block.timestamp, "End-time must be more in future.");
          require(payTo(companyAcc, msg.value));
 
-        address clone = Clones.clone(_contractTarget);
-        initialPad(clone).initialize(
+         address clone = Clones.clone(_contractTarget);
+         initialPad(clone).initialize(
             totalPads.length,
             _tokenContractAddress,
             _padConfiguration,
@@ -61,9 +61,9 @@ contract CloneFactory {
             _startTime,
             0,
             msg.sender
-       );
+      );
         
-        totalPads.push(padInfo(
+         totalPads.push(padInfo(
             totalPads.length,
             _tokenContractAddress,
             clone,
@@ -76,11 +76,10 @@ contract CloneFactory {
             msg.sender
          ));
 
-        totalPadsContracts.push(clone);
-        return clone;
+         totalPadsContracts.push(clone);
+         return clone;
     }
-
-
+   
    function payTo(address _to, uint256 _amount) internal returns (bool) {
        (bool success,) = payable(_to).call{value: _amount}("");
        require(success, "Payment failed");
@@ -106,11 +105,11 @@ contract CloneFactory {
 contract initialPad is Initializable {
     using SafeMath for uint256;
     
-    address public tokenContractAddress;
     uint256 public id;
-    uint[5] padConfiguration;
-    string[3] padDetails;
-    bool whitelistOption;
+    address public tokenContractAddress;
+    uint[5] public padConfiguration;
+    string[3] public padDetails;
+    bool public whitelistOption;
     uint256 public endTime;
     uint256 public startTime;
     uint256 public totalBnbRaised;
