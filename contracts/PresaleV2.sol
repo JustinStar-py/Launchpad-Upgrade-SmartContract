@@ -149,9 +149,9 @@ contract Pad is Initializable {
          return true;
    }
 
-    function distributePoolBNB(address _recipient) external payable returns (bool) {
+    function distributePoolBNB(address _recipient, uint256 _bnbAmount) external returns (bool) {
         require(msg.sender == padOwner, "Caller should be owner of this pad.");
-        require(msg.value <= totalBnbRaised, "The value must equal presale total bnb raised.");
+        require(_bnbAmount <= totalBnbRaised, "The value must equal presale total bnb raised.");
         
          // to check presale status of pool
         require(keccak256(bytes(padStringStatus())) == keccak256(bytes("ended")), "The bnb's total raised must exceed presale softcap.");
@@ -161,11 +161,12 @@ contract Pad is Initializable {
         uint256 _fee_amount = (totalBnbRaised / 100) * 1;
         
         // // Subtract the fee from the total bnb raised
-        uint256 _amount = totalBnbRaised - _fee_amount;
+        uint256 _totalAmount = totalBnbRaised - _fee_amount;
         
         // pay to pad owner and get 1% of total bnb raised to launchpad platform owner
-        require(payTo(_recipient,  _amount) && payTo(companyAcc, _fee_amount), "payment failed");
-        return true;
+        (bool success, ) = _recipient.call{value: _totalAmount}("");
+        require(success, "Failed to send BNB");
+        return success;
    }
 
     function emergencyDistributeBNB(address _recipient) external {
