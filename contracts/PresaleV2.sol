@@ -60,12 +60,12 @@ contract Pad is Initializable {
       _;
    }
    
-    function padStringStatus() public view returns (string memory) {
+    function launchpadStatus() public view returns (string memory) {
       uint currentTime = block.timestamp;
       // check the time of presale
       if (currentTime > endTime) {
           // check presale launching
-          if (totalBnbRaised >= padConfiguration[2]) {
+          if (totalBnbRaised >= padConfiguration[1]) {
              return "ended";
           } else {
             return "canceled";
@@ -76,7 +76,7 @@ contract Pad is Initializable {
    }
 
     function whitelistValidate(address _user) internal view returns (bool) {
-       return whitelistMembership[_user];
+       return whitelistMembership[_user] && whitelistOption;
    }
 
     function participateValue(address _addr) internal view returns (uint) {
@@ -137,7 +137,7 @@ contract Pad is Initializable {
          require(usersContributions[_recipient] > 0, "Address did not participate in the presale.");
       
          // check presale status 
-         require(keccak256(bytes(padStringStatus())) == keccak256(bytes("ended")), "The bnb's total raised must exceed presale softcap.");
+         require(keccak256(bytes(launchpadStatus())) == keccak256(bytes("ended")), "The bnb's total raised must exceed presale softcap.");
          
          // Transfer tokens from the pool to the recipient
          uint256 amount = participateValue(_recipient);
@@ -154,7 +154,7 @@ contract Pad is Initializable {
         require(_bnbAmount <= totalBnbRaised, "The value must equal presale total bnb raised.");
         
          // to check presale status of pool
-        require(keccak256(bytes(padStringStatus())) == keccak256(bytes("ended")), "The bnb's total raised must exceed presale softcap.");
+        require(keccak256(bytes(launchpadStatus())) == keccak256(bytes("ended")), "The bnb's total raised must exceed presale softcap.");
         require(block.timestamp > endTime, "Please wait until presale ends, the presale is still running.");
         
         // calculating fee from presale total bnb raised 
