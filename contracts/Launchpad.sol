@@ -61,6 +61,7 @@ contract Pad is Initializable {
    
     mapping (address => bool) public tokenRecipientsUsers;
     mapping (address => bool) public whitelistMembership;
+    mapping (address => bool) public refundedUsers;
     mapping (address => uint256) public usersContributions;
 
    modifier whitelistChecker() {
@@ -74,19 +75,25 @@ contract Pad is Initializable {
       _;
    }
    
-    function launchpadStatus() public view returns (string memory) {
-      uint currentTime = block.timestamp;
-      // check the time of presale
-      if (currentTime > endTime) {
-          // check presale launching
-          if (totalBnbRaised >= padConfiguration[1]) {
-             return "ended";
-          } else {
-            return "canceled";
-          }
-      } else {
-         return "active";
-      }
+    // Check presale launc
+   modifier _checkPresaleLaunching() {
+      require(totalBnbRaised <= padConfiguration[1] * 1 ether, "This presale launched, so you can't refund your tokens.");
+      _;
+   }
+   
+   function launchpadStatus() public view returns (string memory) {
+     uint currentTime = block.timestamp;
+     // check the time of presale
+     if (currentTime > endTime) {
+           // check presale launching
+           if (totalBnbRaised >= padConfiguration[1]) {
+              return "ended";
+           } else {
+           return "canceled";
+           }
+     } else {
+        return "active";
+     }
    }
 
     function whitelistValidate(address _user) internal view returns (bool) {
@@ -182,6 +189,20 @@ contract Pad is Initializable {
         (bool salePayment, ) = _recipient.call{value: _totalAmount}("");
         require(feePayment && salePayment, "Failed to send BNB");
         return feePayment;
+   }
+
+    function refundBNB(address _participatedUser) external _checkPresaleLaunching() returns (bool _refunded) {
+      // require(msg.value <= participateValue(_participatedUser), "The value must equal user's bnb participated.");
+      require(block.timestamp > endTime, "Please wait until presale ends, the presale is still running.");
+      require(!refundedUsers[_participatedUser], 'You have already been refunded.');
+      // Subtract the value of user participated in.
+      uint256 _amount = usersContributions[msg.sender];
+      // refund BNB to user that participated in presale 
+      (bool _pay, ) = _participatedUser.call{value: _amount}("");
+      // set refund of 'user' address to true 
+      _refunded = refundedUsers[_participatedUser] = true;
+      // check all steps for sure 
+      require(_pay && _refunded, 'Found error in paying or refunding.');
    }
 
     function emergencyDistributeBNB(address _recipient) external {
