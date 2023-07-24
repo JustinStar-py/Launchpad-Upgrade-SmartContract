@@ -43,9 +43,9 @@ contract CloneFactory {
    mapping(address => padInfo[]) public padOwners;
 
    function createClone(address _targetContract, address _tokenContractAddress, 
-        uint256[5] memory _padConfiguration, 
-        string[3] memory _padDetails, bool _whitelistOption, 
-        uint256 _endTime, uint256 _startTime) external payable returns (address) {
+            uint256[5] memory _padConfiguration, 
+            string[3] memory _padDetails, bool _whitelistOption, 
+            uint256 _endTime, uint256 _startTime) external payable returns (address) {
          require(msg.value >= feePoolPrice, "Payment failed! the amount is less than expected.");
          // require(_endTime > block.timestamp, "End-time must be more in future.");
          require(payTo(companyAcc, msg.value));
