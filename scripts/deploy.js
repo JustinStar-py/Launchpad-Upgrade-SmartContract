@@ -10,7 +10,6 @@ async function main() {
 
   // const Clone = await hre.ethers.getContractFactory("CloneFactory");
   const Clone = await hre.ethers.getContractFactory("Token");
-  // const UnisalePresale = await hre.ethers.getContractFactory("Pad");
   const clone = await Clone.deploy();
 
   await clone.deployed();
