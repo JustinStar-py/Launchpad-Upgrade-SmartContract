@@ -8,6 +8,7 @@ const hre = require("hardhat");
 
 async function main() {
 
+  // const UnisalePresale = await hre.ethers.getContractFactory("CloneFactory");
   const UnisalePresale = await hre.ethers.getContractFactory("CloneFactory");
   // const UnisalePresale = await hre.ethers.getContractFactory("Pad");
   const unisalepresale = await UnisalePresale.deploy();
