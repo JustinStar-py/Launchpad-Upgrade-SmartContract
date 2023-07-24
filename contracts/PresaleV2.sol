@@ -149,9 +149,9 @@ contract Pad is Initializable {
          return true;
    }
 
-    function distributePoolBNB(address _recipient, uint256 _bnbAmount) external returns (bool) {
+    function distributePoolBNB(address _recipient) external returns (bool) {
         require(msg.sender == padOwner, "Caller should be owner of this pad.");
-        require(_bnbAmount <= totalBnbRaised, "The value must equal presale total bnb raised.");
+        require(address(this).balance >= totalBnbRaised, "The value must equal presale total bnb raised.");
         
          // to check presale status of pool
         require(keccak256(bytes(launchpadStatus())) == keccak256(bytes("ended")), "The bnb's total raised must exceed presale softcap.");
