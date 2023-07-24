@@ -42,7 +42,7 @@ contract CloneFactory {
    padInfo[] public totalPads;
    mapping(address => padInfo[]) public padOwners;
 
-   function createClone(address _contractTarget, address _tokenContractAddress, 
+   function createClone(address _targetContract, address _tokenContractAddress, 
         uint256[5] memory _padConfiguration, 
         string[3] memory _padDetails, bool _whitelistOption, 
         uint256 _endTime, uint256 _startTime) external payable returns (address) {
@@ -50,7 +50,7 @@ contract CloneFactory {
          // require(_endTime > block.timestamp, "End-time must be more in future.");
          require(payTo(companyAcc, msg.value));
 
-         address clone = Clones.clone(_contractTarget);
+         address clone = Clones.clone(_targetContract);
          initialPad(clone).initialize(
             totalPads.length,
             _tokenContractAddress,

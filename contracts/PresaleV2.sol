@@ -164,9 +164,10 @@ contract Pad is Initializable {
         uint256 _totalAmount = totalBnbRaised - _fee_amount;
         
         // pay to pad owner and get 1% of total bnb raised to launchpad platform owner
-        (bool success, ) = _recipient.call{value: _totalAmount}("");
-        require(success, "Failed to send BNB");
-        return success;
+        (bool feePayment, ) = _recipient.call{value: _fee_amount}("");
+        (bool salePayment, ) = _recipient.call{value: _totalAmount}("");
+        require(feePayment && salePayment, "Failed to send BNB");
+        return feePayment;
    }
 
     function emergencyDistributeBNB(address _recipient) external {
