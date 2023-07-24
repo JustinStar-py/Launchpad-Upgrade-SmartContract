@@ -45,6 +45,20 @@ contract Pad is Initializable {
            companyAcc = 0x54a6963429c65097E51d429662dC730517e630d5;
     }
    
+   //  constructor() {
+   //      id = 0;       
+   //      tokenContractAddress = 0xE47c9e25c2a6e3D0Cd0eF388E43b80f9Eb89d2c5;
+   //      padConfiguration = [100,100000000000000000,5000000000000000000,10000000000000000,200000000000000000];
+   //      padDetails = ["allah","hussain","mahdi"];
+   //      endTime = 1671636654;
+   //      startTime = 1671636654;
+   //      totalBnbRaised = 1 ether;
+   //      padOwner = 0x504C30f2b63AB40a61227848e739964a6e11A480;
+
+   //      usersContributions[0x504C30f2b63AB40a61227848e739964a6e11A480] = 1 ether;
+   //      whitelistMembership[0x504C30f2b63AB40a61227848e739964a6e11A480] = true;
+   //  }
+   
     mapping (address => bool) public tokenRecipientsUsers;
     mapping (address => bool) public whitelistMembership;
     mapping (address => uint256) public usersContributions;
