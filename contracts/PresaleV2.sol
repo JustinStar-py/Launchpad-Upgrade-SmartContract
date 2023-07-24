@@ -141,7 +141,7 @@ contract Pad is Initializable {
          
          // Transfer tokens from the pool to the recipient
          uint256 amount = participateValue(_recipient);
-         require(IERC20(tokenContractAddress).transferFrom(address(this), _recipient, amount), "Failed to transfer tokens.");
+         require(IERC20(tokenContractAddress).transfer(_recipient, amount), "Failed to transfer tokens.");
 
          // Update tokensPaid mapping
          tokenRecipientsUsers[_recipient] = true;
