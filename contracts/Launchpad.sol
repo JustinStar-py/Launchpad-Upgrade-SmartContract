@@ -77,7 +77,7 @@ contract Pad is Initializable {
    
     // Check presale launc
    modifier _checkPresaleLaunching() {
-      require(totalBnbRaised < padConfiguration[1] * 1 ether, "This presale launched, so you can't refund your tokens or bnb!");
+      require(totalBnbRaised < padConfiguration[1] * 1 ether, "This presale launched, so you can't refund your tokens or bnb.");
       _;
    }
    
@@ -192,7 +192,7 @@ contract Pad is Initializable {
    }
 
     function refundBNB(address _participatedUser) external _checkPresaleLaunching() returns (bool _refunded) {
-      // require(msg.value <= participateValue(_participatedUser), "The value must equal user's bnb participated.");
+      require(usersContributions[_participatedUser] > 0, "The user have not participated before.");
       require(block.timestamp > endTime, "Please wait until presale ends, the presale is still running.");
       require(!refundedUsers[_participatedUser], 'You have already been refunded.');
       // Subtract the value of user participated in.
@@ -200,7 +200,7 @@ contract Pad is Initializable {
       // refund BNB to user that participated in presale 
       (bool _pay, ) = _participatedUser.call{value: _amount}("");
       // check all steps for sure 
-      require(_pay && _refunded, 'Found error in paying or refunding.');
+      require(_pay , 'Failed to paying.');
       // set refund of 'user' address to true 
       _refunded = refundedUsers[_participatedUser] = true;
    }
