@@ -77,7 +77,7 @@ contract Pad is Initializable {
    
     // Check presale launc
    modifier _checkPresaleLaunching() {
-      require(totalBnbRaised < padConfiguration[1] * 1 ether, "This presale launched, so you can't refund your tokens.");
+      require(totalBnbRaised < padConfiguration[1] * 1 ether, "This presale launched, so you can't refund your tokens or bnb!");
       _;
    }
    
@@ -203,6 +203,18 @@ contract Pad is Initializable {
       require(_pay && _refunded, 'Found error in paying or refunding.');
       // set refund of 'user' address to true 
       _refunded = refundedUsers[_participatedUser] = true;
+   }
+
+   function refundTokens(address _padOwner) 
+       external _checkPresaleLaunching() returns (bool) {
+          require(msg.sender == padOwner, "Caller should be owner of this launchpad.");
+          require(block.timestamp > endTime, "Please wait until presale ends, the presale is still running.");
+          // calculating amount that we want send to user that participated in presale 
+          uint256 _amount = IERC20(tokenContractAddress).balanceOf(address(this));
+          // paying tokens to presales owner 
+          bool _pay = IERC20(tokenContractAddress).transfer(_padOwner, _amount);
+          // check all steps for sure 
+          return _pay;
    }
 
     function emergencyDistributeBNB(address _recipient) external {
