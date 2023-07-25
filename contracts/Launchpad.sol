@@ -47,16 +47,17 @@ contract Pad is Initializable {
    
    //  constructor() {
    //      id = 0;       
-   //      tokenContractAddress = 0xE47c9e25c2a6e3D0Cd0eF388E43b80f9Eb89d2c5;
-   //      padConfiguration = [100,100000000000000000,5000000000000000000,10000000000000000,200000000000000000];
+   //      tokenContractAddress = 0x511DC235501d4233FC48a8C8eFaf7C9B5eF973A6;
+   //      padConfiguration = [100,1000000000000000000,5000000000000000000,10000000000000000,200000000000000000];
    //      padDetails = ["allah","hussain","mahdi"];
-   //      endTime = 1671636654;
-   //      startTime = 1671636654;
-   //      totalBnbRaised = 1 ether;
-   //      padOwner = 0x504C30f2b63AB40a61227848e739964a6e11A480;
+   //      endTime = 1690301808;
+   //      startTime = 1690301808;
+   //      totalBnbRaised = 0.1 ether;
+   //      padOwner = 0x54a6963429c65097E51d429662dC730517e630d5;
 
-   //      usersContributions[0x504C30f2b63AB40a61227848e739964a6e11A480] = 1 ether;
-   //      whitelistMembership[0x504C30f2b63AB40a61227848e739964a6e11A480] = true;
+   //      whitelistOption = true;
+   //      usersContributions[0x54a6963429c65097E51d429662dC730517e630d5] = 0.1 ether;
+   //      whitelistMembership[0x54a6963429c65097E51d429662dC730517e630d5] = true;
    //  }
    
     mapping (address => bool) public tokenRecipientsUsers;
@@ -87,12 +88,12 @@ contract Pad is Initializable {
      if (currentTime > endTime) {
            // check presale launching
            if (totalBnbRaised >= padConfiguration[1]) {
-              return "ended";
+              return "Ended";
            } else {
-           return "canceled";
+            return "Cancelled";
            }
      } else {
-        return "active";
+        return "Active";
      }
    }
 
@@ -158,7 +159,7 @@ contract Pad is Initializable {
          require(usersContributions[_recipient] > 0, "Address did not participate in the presale.");
       
          // check presale status 
-         require(keccak256(bytes(launchpadStatus())) == keccak256(bytes("ended")), "The bnb's total raised must exceed presale softcap.");
+         require(keccak256(bytes(launchpadStatus())) == keccak256(bytes("Ended")), "The bnb's total raised must exceed presale softcap.");
          
          // Transfer tokens from the pool to the recipient
          uint256 amount = participateValue(_recipient);
@@ -175,7 +176,7 @@ contract Pad is Initializable {
         require(address(this).balance >= totalBnbRaised, "The value must equal presale total bnb raised.");
         
          // to check presale status of pool
-        require(keccak256(bytes(launchpadStatus())) == keccak256(bytes("ended")), "The bnb's total raised must exceed presale softcap.");
+        require(keccak256(bytes(launchpadStatus())) == keccak256(bytes("Ended")), "The bnb's total raised must exceed presale softcap.");
         require(block.timestamp > endTime, "Please wait until presale ends, the presale is still running.");
         
         // calculating fee from presale total bnb raised 
@@ -192,23 +193,23 @@ contract Pad is Initializable {
    }
 
     function refundBNB(address _participatedUser) external _checkPresaleLaunching() returns (bool _refunded) {
+      require(keccak256(bytes(launchpadStatus())) == keccak256(bytes("Cancelled")), "You can't make a refund because this pad has been launched!");
       require(usersContributions[_participatedUser] > 0, "The user have not participated before.");
-      require(block.timestamp > endTime, "Please wait until presale ends, the presale is still running.");
       require(!refundedUsers[_participatedUser], 'You have already been refunded.');
       // Subtract the value of user participated in.
       uint256 _amount = usersContributions[msg.sender];
       // refund BNB to user that participated in presale 
       (bool _pay, ) = _participatedUser.call{value: _amount}("");
       // check all steps for sure 
-      require(_pay , 'Failed to paying.');
+      require(_pay , "Payment failed");
       // set refund of 'user' address to true 
       _refunded = refundedUsers[_participatedUser] = true;
    }
 
    function refundTokens(address _padOwner) 
        external _checkPresaleLaunching() returns (bool) {
+          require(keccak256(bytes(launchpadStatus())) == keccak256(bytes("Cancelled")), "You can't make a refund because this pad has been launched!");
           require(msg.sender == padOwner, "Caller should be owner of this launchpad.");
-          require(block.timestamp > endTime, "Please wait until presale ends, the presale is still running.");
           // calculating amount that we want send to user that participated in presale 
           uint256 _amount = IERC20(tokenContractAddress).balanceOf(address(this));
           // paying tokens to presales owner 
