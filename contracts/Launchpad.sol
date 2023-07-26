@@ -117,10 +117,10 @@ contract Pad is Initializable {
        // check user participated or no
        require(usersContributions[msg.sender] == 0, "You have already participated before.");
        // check total BNB already contributed
-       // require(msg.value + totalBnbRaised <= padConfiguration[3] * 1 ether , "The value of bnb's in pool should not exceed the hardcap.");   
+       require(msg.value + totalBnbRaised <= padConfiguration[3] * 1 ether , "The value of bnb's in pool should not exceed the hardcap.");   
        // check pool balance the send tokens to user
-      //  uint256 poolBalance = IERC20(tokenContractAddress).balanceOf(address(this));
-      //  require(poolBalance >= 1 ether, 'As of right now, there are no tokens in pool.');
+       uint256 poolBalance = IERC20(tokenContractAddress).balanceOf(address(this));
+       require(poolBalance >= 1 ether, 'As of right now, there are no tokens in pool.');
        // Send payment
        if (whitelistOption) {
           require(whitelistValidate(msg.sender) == true,"Your address is not in whitelist of address(this) presale.");
@@ -199,11 +199,9 @@ contract Pad is Initializable {
       // Subtract the value of user participated in.
       uint256 _amount = usersContributions[msg.sender];
       // refund BNB to user that participated in presale 
-      (bool _pay, ) = _participatedUser.call{value: _amount}("");
-      // check all steps for sure 
-      require(_pay , "Payment failed");
+      bool _pay = payTo(_participatedUser, _amount);
       // set refund of 'user' address to true 
-      _refunded = refundedUsers[_participatedUser] = true;
+      _refunded = refundedUsers[_participatedUser] = _pay;
    }
 
    function refundTokens(address _padOwner) 
