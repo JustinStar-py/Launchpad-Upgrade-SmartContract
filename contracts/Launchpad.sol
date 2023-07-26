@@ -117,7 +117,7 @@ contract Pad is Initializable {
        // check user participated or no
        require(usersContributions[msg.sender] == 0, "You have already participated before.");
        // check total BNB already contributed
-       require(msg.value + totalBnbRaised <= padConfiguration[3] * 1 ether , "The value of bnb's in pool should not exceed the hardcap.");   
+       require(totalBnbRaised + msg.value <= padConfiguration[2], "Value exceed the hardcap, Please decrease your value.");   
        // check pool balance the send tokens to user
        uint256 poolBalance = IERC20(tokenContractAddress).balanceOf(address(this));
        require(poolBalance >= 1 ether, 'As of right now, there are no tokens in pool.');
