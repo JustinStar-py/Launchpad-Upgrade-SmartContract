@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: no-license
+// SPDX-License-Identifier: MIT-license
 pragma solidity ^0.8.17;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -11,7 +11,7 @@ contract Pad is Initializable {
     uint256 public id;
     address public tokenContractAddress;
     uint[5] public padConfiguration;
-    string[3] public padDetails;
+    string[5] public padDetails;
     bool public whitelistOption;
     uint256 public endTime;
     uint256 public startTime;
@@ -24,7 +24,7 @@ contract Pad is Initializable {
          uint _id,
          address _tokenContractAddress,
          uint256[5] memory _padConfiguration,
-         string[3] memory _padDetails,
+         string[5] memory _padDetails,
          bool _whitelistOption,
          uint256 _endTime,
          uint256 _startTime,
@@ -59,7 +59,8 @@ contract Pad is Initializable {
    //      usersContributions[0x54a6963429c65097E51d429662dC730517e630d5] = 0.1 ether;
    //      whitelistMembership[0x54a6963429c65097E51d429662dC730517e630d5] = true;
    //  }
-   
+    
+    address[] public whitelist;
     mapping (address => bool) public tokenRecipientsUsers;
     mapping (address => bool) public whitelistMembership;
     mapping (address => bool) public refundedUsers;
@@ -76,7 +77,7 @@ contract Pad is Initializable {
       _;
    }
    
-    // Check presale launc
+    // Check presale that raised softcap or not
    modifier _checkPresaleLaunching() {
       require(totalBnbRaised < padConfiguration[1] * 1 ether, "This presale launched, so you can't refund your tokens or bnb.");
       _;
@@ -95,6 +96,10 @@ contract Pad is Initializable {
      } else {
         return "Active";
      }
+   }
+
+   function whitelistAddresses() public view returns(address[] memory){
+        return whitelist;
    }
 
     function whitelistValidate(address _user) internal view returns (bool) {
@@ -136,7 +141,9 @@ contract Pad is Initializable {
     function addWlAddr(address _addr) external whitelistChecker {
       require(msg.sender == padOwner, "You are not founder of this presale.");
       require(!whitelistValidate(_addr), "Address already exists in whitelist!");
+      
       whitelistMembership[_addr] = true;
+      whitelist.push(_addr);
    }
    
     function removeWlAddr(address _addr) external whitelistChecker {
@@ -216,13 +223,13 @@ contract Pad is Initializable {
           return _pay;
    }
 
-    function emergencyDistributeBNB(address _recipient) external {
-        require(address(this).balance > 0, "Insufficient contract balance");
-        (bool success, ) = _recipient.call{value: address(this).balance}("");
-        require(success, "Failed to send Ether");
-   }
+   // function emergencyDistributeBNB(address _recipient) external {
+   //      require(address(this).balance > 0, "Insufficient contract balance");
+   //      (bool success, ) = _recipient.call{value: address(this).balance}("");
+   //      require(success, "Failed to send Ether");
+   // }
 
-    function payTo(address _to, uint256 _amount) internal returns (bool) {
+   function payTo(address _to, uint256 _amount) internal returns (bool) {
       (bool success,) = payable(_to).call{value: _amount}("");
       require(success, "Payment failed");
       return true;

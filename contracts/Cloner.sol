@@ -10,15 +10,19 @@ contract CloneFactory {
     address[] public totalPadsContracts;
     
     struct padInfo {
+      // ---------------
       // rate
       // softCap
       // hardCap
       // minBuy
       // maxBuy
-      // info
-      // tgLink
-      // ybLink
-      // twLink
+      // ---------------
+      // token name
+      // website
+      // telegram
+      // twitter
+      // information
+      // ---------------
       // startTime
       // endTime
       // totalBnbRaised
@@ -27,7 +31,7 @@ contract CloneFactory {
       address tokenCA;
       address pool;
       uint[5] padConfiguration;
-      string[3] padDetails;
+      string[5] padDetails;
       bool whitelistOption;
       uint endTime;
       uint startTime;
@@ -44,11 +48,12 @@ contract CloneFactory {
 
    function createClone(address _targetContract, address _tokenContractAddress, 
             uint256[5] memory _padConfiguration, 
-            string[3] memory _padDetails, bool _whitelistOption, 
+            string[5] memory _padDetails, bool _whitelistOption, 
             uint256 _endTime, uint256 _startTime) external payable returns (address) {
          require(msg.value >= feePoolPrice, "Payment failed! the amount is less than expected.");
          // require(_endTime > block.timestamp, "End-time must be more in future.");
          require(payTo(companyAcc, msg.value));
+         require(_endTime > block.timestamp, "End-time of launchpad should be in the future.");
 
          address clone = Clones.clone(_targetContract);
          initialPad(clone).initialize(
@@ -100,6 +105,10 @@ contract CloneFactory {
       return totalPads.length;
    }
 
+   function _returnTotalPads() public view returns(padInfo[] memory){
+        return totalPads;
+   }
+
 }
 
 contract initialPad is Initializable {
@@ -108,7 +117,7 @@ contract initialPad is Initializable {
     uint256 public id;
     address public tokenContractAddress;
     uint[5] public padConfiguration;
-    string[3] public padDetails;
+    string[5] public padDetails;
     bool public whitelistOption;
     uint256 public endTime;
     uint256 public startTime;
@@ -119,7 +128,7 @@ contract initialPad is Initializable {
          uint _id,
          address _tokenContractAddress,
          uint256[5] memory _padConfiguration,
-         string[3] memory _padDetails,
+         string[5] memory _padDetails,
          bool _whitelistOption,
          uint256 _endTime,
          uint256 _startTime,
